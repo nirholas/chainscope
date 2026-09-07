@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 164 32" width="164" height="32" fill="none" role="img" aria-label="Chainscope">
+  <title>Chainscope</title>
+  <!-- Scope reticle: the lens the dashboard looks through -->
+  <g stroke="#fff" stroke-width="2" stroke-linecap="round">
+    <circle cx="16" cy="16" r="12.5" opacity="0.9"/>
+    <path d="M16 0.5v3.5M16 28v3.5M0.5 16h3.5M28 16h3.5" opacity="0.9"/>
+  </g>
+  <!-- Market bars inside the lens: what it is trained on -->
+  <g fill="#fff">
+    <rect x="9.75" y="17" width="2.5" height="5.5" rx="1.25" opacity="0.55"/>
+    <rect x="14.75" y="13" width="2.5" height="9.5" rx="1.25" opacity="0.78"/>
+    <rect x="19.75" y="9.5" width="2.5" height="13" rx="1.25"/>
+  </g>
+  <text x="42" y="22"
+        font-family="'SF Mono','Monaco','Inconsolata','Fira Code',ui-monospace,monospace"
+        font-size="15" font-weight="600" letter-spacing="1.2" fill="#fff">CHAINSCOPE</text>
+</svg>

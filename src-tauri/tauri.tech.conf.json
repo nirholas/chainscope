@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Tech Monitor",
+  "mainBinaryName": "tech-monitor",
+  "identifier": "dev.chainscope.tech.desktop",
+  "app": {
+    "windows": [
+      {
+        "title": "Tech Monitor"
+      }
+    ]
+  },
+  "bundle": {
+    "shortDescription": "Tech Monitor desktop app",
+    "longDescription": "Tech Monitor desktop app for real-time AI and technology intelligence.",
+    "targets": [
+      "app",
+      "dmg",
+      "nsis",
+      "msi"
+    ],
+    "macOS": {
+      "hardenedRuntime": true
+    },
+    "windows": {
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "https://timestamp.digicert.com"
+    }
+  }
+}
