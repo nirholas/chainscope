@@ -19307,3 +19307,68 @@ body.has-critical-banner .panels-grid {
 }
 .rhc-footer a { color: inherit; text-decoration: none; border-bottom: 1px dotted rgba(255, 255, 255, 0.25); }
 .rhc-footer a:hover, .rhc-footer a:focus-visible { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Chains Overview panel ────────────────────────────────────────── */
+.chov-summary {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 6px; padding: 8px; margin-bottom: 2px;
+}
+.chov-stat {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 6px 4px; background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 4px; min-width: 0;
+}
+.chov-stat-value {
+  font-size: 14px; font-weight: 700; font-family: monospace; line-height: 1.2;
+  color: rgba(255, 255, 255, 0.9); max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+}
+.chov-stat-label {
+  font-size: 9px; color: rgba(255, 255, 255, 0.4); text-transform: uppercase;
+  margin-top: 3px; text-align: center; line-height: 1.2;
+}
+
+/* Shared column geometry keeps the header aligned with every row. */
+.chov-head, .chov-row {
+  display: grid; grid-template-columns: minmax(72px, 1.9fr) minmax(18px, 0.7fr) 60px 60px 44px;
+  align-items: center; gap: 6px; padding: 4px 8px;
+}
+.chov-head {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.4px;
+  color: rgba(255, 255, 255, 0.35); border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.chov-rows { max-height: 100%; overflow-y: auto; }
+.chov-row { border-bottom: 1px solid rgba(255, 255, 255, 0.04); transition: background 0.15s; }
+.chov-row:last-child { border-bottom: none; }
+.chov-row:hover { background: rgba(255, 255, 255, 0.04); }
+
+.chov-name {
+  font-size: 11px; color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chov-bar-wrap {
+  height: 5px; background: rgba(255, 255, 255, 0.05); border-radius: 3px; overflow: hidden;
+}
+.chov-bar {
+  display: block; height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, rgba(76, 175, 80, 0.45), rgba(76, 175, 80, 0.9));
+  transition: width 0.3s ease;
+}
+.chov-vol, .chov-tvl, .chov-turn {
+  font-size: 11px; font-family: monospace; text-align: right;
+  color: rgba(255, 255, 255, 0.8); white-space: nowrap;
+}
+.chov-tvl { color: rgba(255, 255, 255, 0.5); }
+.chov-turn { font-weight: 700; }
+.chov-turn.chov-hot { color: #4caf50; }
+.chov-turn.chov-warm { color: #ffc107; }
+.chov-turn.chov-cold { color: rgba(255, 255, 255, 0.4); }
+.chov-stat-value.chov-hot { color: #4caf50; }
+.chov-stat-value.chov-warm { color: #ffc107; }
+
+.chov-empty { padding: 20px 12px; text-align: center; }
+.chov-empty-title { font-size: 12px; color: rgba(255, 255, 255, 0.7); margin-bottom: 4px; }
+.chov-empty-hint { font-size: 10px; color: rgba(255, 255, 255, 0.4); line-height: 1.4; }
+
+@media (prefers-reduced-motion: reduce) {
+  .chov-bar { transition: none; }
+}

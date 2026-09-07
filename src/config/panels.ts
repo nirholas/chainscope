@@ -12,56 +12,62 @@ const SHOW_PRODUCTIVITY_WIDGETS = typeof localStorage !== 'undefined'
 // Panel order matters! First panels appear at top of grid.
 // Priority 1 = core panels, Priority 2 = secondary/optional
 const FULL_PANELS: Record<string, PanelConfig> = {
+  // === Chains: where the activity actually is ===
+  'chains-overview': { name: 'Chains Overview', enabled: true, priority: 1 },
+  'robinhood-chain': { name: 'Robinhood Chain', enabled: true, priority: 1 },
+  'chain-tvl': { name: 'Chain TVL', enabled: true, priority: 1 },
+  'chain-activity': { name: 'Chain Activity', enabled: true, priority: 2 },
+  'gas-tracker': { name: 'Gas Tracker', enabled: true, priority: 1 },
+  'btc-network': { name: 'Bitcoin Network', enabled: true, priority: 2 },
+
+  // === Perps: positioning before it unwinds ===
+  'funding-rates': { name: 'Funding Rates', enabled: true, priority: 1 },
+  'open-interest': { name: 'Open Interest', enabled: true, priority: 1 },
+  'long-short': { name: 'Long/Short Ratio', enabled: true, priority: 1 },
+  'liquidations': { name: 'Liquidations', enabled: true, priority: 1 },
+
+  // === Trenches: new launches and early flow ===
+  'dex-trending': { name: 'DEX Trending', enabled: true, priority: 1 },
+  'trending-tokens': { name: 'Trending Tokens', enabled: true, priority: 2 },
+  'dex-volume': { name: 'DEX Volume', enabled: true, priority: 1 },
+  'wallet-tracker': { name: 'Wallet Tracker', enabled: true, priority: 1 },
+
+  // === Arbitrage: divergence and the cost of closing it ===
+  'venue-spread': { name: 'Venue Spread', enabled: true, priority: 1 },
+  'fee-compare': { name: 'Fee Compare', enabled: true, priority: 1 },
+  'bridge-monitor': { name: 'Bridge Monitor', enabled: true, priority: 1 },
+  'mev-monitor': { name: 'MEV Monitor', enabled: true, priority: 1 },
+  'exchange-flow': { name: 'Exchange Flow', enabled: true, priority: 1 },
+
+  // === Charts and live tape ===
   chart: { name: 'TradingView Chart', enabled: true, priority: 1 },
+  crypto: { name: 'Crypto', enabled: true, priority: 1 },
   'live-news': { name: 'Live News', enabled: true, priority: 1 },
 
-  // === Tier 1: "I will lose money if I miss this" ===
+  // === Everything else: context, research and news lanes ===
   'defi-news': { name: 'DeFi News', enabled: true, priority: 1 },
   'defi-protocol-news': { name: 'DeFi Protocols', enabled: true, priority: 1 },
   'defi-yields': { name: 'DeFi Yields', enabled: true, priority: 1 },
   'lending-rates': { name: 'Lending Rates', enabled: true, priority: 1 },
-  crypto: { name: 'Crypto', enabled: true, priority: 1 },
   polymarket: { name: 'Predictions', enabled: true, priority: 1 },
-  'open-interest': { name: 'Open Interest', enabled: true, priority: 1 },
   ai: { name: 'AI/ML', enabled: true, priority: 1 },
-
-  // === Tier 2: "This gives me edge" ===
   'governance': { name: 'Governance', enabled: true, priority: 1 },
   'bitcoin-news': { name: 'Bitcoin News', enabled: true, priority: 1 },
   'ethereum-news': { name: 'Ethereum News', enabled: true, priority: 1 },
   'solana-news': { name: 'Solana News', enabled: true, priority: 1 },
-  'funding-rates': { name: 'Funding Rates', enabled: true, priority: 1 },
-  'gas-tracker': { name: 'Gas Tracker', enabled: true, priority: 1 },
-  'fee-compare': { name: 'Fee Compare', enabled: true, priority: 1 },
   'protocol-health': { name: 'Protocol Health', enabled: true, priority: 1 },
-  'venue-spread': { name: 'Venue Spread', enabled: true, priority: 1 },
-  'dex-trending': { name: 'DEX Trending', enabled: true, priority: 1 },
-  'liquidations': { name: 'Liquidations', enabled: true, priority: 1 },
-  'long-short': { name: 'Long/Short Ratio', enabled: true, priority: 1 },
   'protocol-revenue': { name: 'Protocol Revenue', enabled: true, priority: 1 },
-  'chain-tvl': { name: 'Chain TVL', enabled: true, priority: 1 },
   'on-chain': { name: 'On-Chain Data', enabled: true, priority: 1 },
-  'dex-volume': { name: 'DEX Volume', enabled: true, priority: 1 },
-  'exchange-flow': { name: 'Exchange Flow', enabled: true, priority: 1 },
-  'chain-activity': { name: 'Chain Activity', enabled: true, priority: 2 },
-  'bridge-monitor': { name: 'Bridge Monitor', enabled: true, priority: 1 },
   'hack-alerts': { name: 'Exploit Alerts', enabled: true, priority: 1 },
   'exploit-ledger': { name: 'Exploit Ledger', enabled: true, priority: 2 },
-  'mev-monitor': { name: 'MEV Monitor', enabled: true, priority: 1 },
   'token-unlocks': { name: 'Token Unlocks', enabled: true, priority: 1 },
-  'robinhood-chain': { name: 'Robinhood Chain', enabled: true, priority: 1 },
-  'btc-network': { name: 'Bitcoin Network', enabled: true, priority: 2 },
   'sector-rotation': { name: 'Sector Rotation', enabled: true, priority: 2 },
-
-  // === Tier 3: Markets & Finance ===
   markets: { name: 'Markets', enabled: true, priority: 1 },
   commodities: { name: 'Commodities', enabled: true, priority: 1 },
   finance: { name: 'Financial', enabled: true, priority: 1 },
   'etf-flows': { name: 'BTC ETF Tracker', enabled: true, priority: 1 },
   stablecoins: { name: 'Stablecoins', enabled: true, priority: 1 },
   'macro-signals': { name: 'Market Radar', enabled: true, priority: 2 },
-
-  // === Tier 4: News feeds ===
   'crypto-research': { name: 'Crypto Research', enabled: true, priority: 2 },
   'crypto-security': { name: 'Crypto Security', enabled: true, priority: 2 },
   'l1l2-news': { name: 'L1/L2 Ecosystems', enabled: true, priority: 2 },
@@ -69,30 +75,26 @@ const FULL_PANELS: Record<string, PanelConfig> = {
   'crypto-dev': { name: 'Crypto Dev', enabled: true, priority: 2 },
   tech: { name: 'Technology', enabled: true, priority: 2 },
   heatmap: { name: 'Sector Heatmap', enabled: true, priority: 2 },
-
-  // === Analytics & Price widgets ===
   'fear-greed': { name: 'Fear & Greed Index', enabled: true, priority: 2 },
   'market-movers': { name: 'Market Movers', enabled: true, priority: 2 },
   'token-ticker': { name: 'Token Ticker', enabled: true, priority: 2 },
-  'trending-tokens': { name: 'Trending Tokens', enabled: true, priority: 2 },
   'morning-briefing': { name: 'Morning Briefing', enabled: true, priority: 2 },
-
-  // === DeFi Markets widgets ===
   'global-stats': { name: 'DeFi Global Stats', enabled: true, priority: 2 },
   'top-protocols': { name: 'Top Protocols', enabled: true, priority: 2 },
   'category-breakdown': { name: 'Category Breakdown', enabled: true, priority: 2 },
   'revenue-earners': { name: 'Revenue Earners', enabled: true, priority: 2 },
   'stablecoin-dashboard': { name: 'Stablecoin Dashboard', enabled: true, priority: 2 },
-  'wallet-tracker': { name: 'Wallet Tracker', enabled: true, priority: 1 },
   'top-yields': { name: 'Top Yields', enabled: true, priority: 2 },
   'compare-protocols': { name: 'Compare Protocols', enabled: true, priority: 2 },
   'price-alerts': { name: 'Price Alerts', enabled: true, priority: 2 },
-
-  // === Scanner, Sentiment & Tools ===
   'defi-scanner': { name: 'DeFi Scanner', enabled: true, priority: 2 },
   'social-sentiment': { name: 'Social Sentiment', enabled: true, priority: 2 },
+  'portfolio-dna': { name: 'Portfolio DNA', enabled: true, priority: 2 },
+  'crypto-news-feed': { name: 'Crypto News Feed', enabled: true, priority: 1 },
+  'crypto-trending': { name: 'Trending Topics', enabled: true, priority: 2 },
+  monitors: { name: 'My Monitors', enabled: true, priority: 2 },
 
-  // === Productivity & Tools (gated behind localStorage flag) ===
+  // Productivity widgets stay behind the Settings toggle.
   ...(SHOW_PRODUCTIVITY_WIDGETS ? {
     'notes': { name: 'Notes', enabled: true, priority: 2 },
     'calendar': { name: 'Calendar', enabled: true, priority: 2 },
@@ -104,16 +106,6 @@ const FULL_PANELS: Record<string, PanelConfig> = {
     'notepad': { name: 'Notepad', enabled: true, priority: 2 },
     'photo-gallery': { name: 'Photo Gallery', enabled: true, priority: 2 },
   } : {}),
-  'portfolio-dna': { name: 'Portfolio DNA', enabled: true, priority: 2 },
-
-  // === Sperax Protocol ===
-
-  // === Aggregated Crypto News ===
-  'crypto-news-feed': { name: 'Crypto News Feed', enabled: true, priority: 1 },
-  'crypto-trending': { name: 'Trending Topics', enabled: true, priority: 2 },
-
-  // === Always last ===
-  monitors: { name: 'My Monitors', enabled: true, priority: 2 },
 };
 
 const FULL_MAP_LAYERS: MapLayers = {

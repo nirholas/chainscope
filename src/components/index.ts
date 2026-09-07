@@ -94,3 +94,4 @@ export * from './CryptoTrendingPanel';
 
 // --- Robinhood Chain ---
 export * from './RobinhoodChainPanel';
+export * from './ChainsOverviewPanel';

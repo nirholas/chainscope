@@ -14,7 +14,7 @@ Chainscope reads public data directly, from chain RPCs and keyless public APIs, 
 
 **Arbitrage.** Cross-venue price divergence, cross-chain fee comparison, gas across chains and bridge flow, which is where the executable spreads actually live.
 
-**Chains.** Per-chain TVL, activity, gas and health. [Robinhood Chain](docs/robinhood-chain.md) (chain 4663) is wired directly to its JSON-RPC with a three-endpoint failover chain: block height, block time, gas, USDG supply and Uniswap v2 pair count, all read live with no API key.
+**Chains.** A [ranked overview of every chain](docs/chains-overview.md) by 24h DEX volume, TVL and turnover (volume/TVL), which separates chains that trade from chains that merely custody. Plus per-chain TVL, activity, gas and health. [Robinhood Chain](docs/robinhood-chain.md) (chain 4663) is wired directly to its JSON-RPC with a three-endpoint failover chain: block height, block time, gas, USDG supply and Uniswap v2 pair count, all read live with no API key.
 
 **Context.** Protocol revenue and health scores, token unlocks, stablecoin health, ETF flows, exploit alerts and a structured exploit ledger, MEV monitoring, governance, plus 30+ RSS lanes with topic extraction.
 

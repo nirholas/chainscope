@@ -2203,6 +2203,10 @@ export class App {
       const { ProtocolHealthPanel } = await import('@/components/ProtocolHealthPanel');
       return new ProtocolHealthPanel();
     });
+    this.lazyFactories.set('chains-overview', async () => {
+      const { ChainsOverviewPanel } = await import('@/components/ChainsOverviewPanel');
+      return new ChainsOverviewPanel();
+    });
     this.lazyFactories.set('robinhood-chain', async () => {
       const { RobinhoodChainPanel } = await import('@/components/RobinhoodChainPanel');
       return new RobinhoodChainPanel();

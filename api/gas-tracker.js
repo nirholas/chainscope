@@ -16,6 +16,7 @@ const CHAINS = [
   { name: 'Polygon', rpc: 'https://polygon-rpc.com', unit: 'gwei', decimals: 9, highThreshold: 300, moderateThreshold: 50 },
   { name: 'BSC', rpc: 'https://bsc-dataseed.binance.org', unit: 'gwei', decimals: 9, highThreshold: 10, moderateThreshold: 3 },
   { name: 'Avalanche', rpc: 'https://api.avax.network/ext/bc/C/rpc', unit: 'nAVAX', decimals: 9, highThreshold: 50, moderateThreshold: 25 },
+  { name: 'Robinhood', rpc: 'https://rpc.mainnet.chain.robinhood.com', fallbackRpc: 'https://robinhood-rpc.publicnode.com', unit: 'gwei', decimals: 9, highThreshold: 1, moderateThreshold: 0.5 },
 ];
 
 function buildFallbackResult() {
