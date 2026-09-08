@@ -2,6 +2,8 @@
 
 An open dashboard for onchain trading. Perps, trenches, arbitrage and a live overview of every chain, on one screen.
 
+**Live:** <https://chainscope-8m2.pages.dev>
+
 Chainscope reads public data directly, from chain RPCs and keyless public APIs, and renders it as a dense command center: ~140 panels, a 3D globe, and a resilient fetch layer that fails over instead of going blank. It runs as a web app, a PWA, and a Tauri desktop app.
 
 > **Status:** actively being refocused. Chainscope is a rebrand and redirection of a general DeFi intelligence dashboard toward onchain trading specifically. Robinhood Chain support is the first chain built out under the new direction; the broader all-chains overview is in progress. See [ROADMAP.md](ROADMAP.md).

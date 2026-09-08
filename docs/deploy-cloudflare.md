@@ -64,9 +64,13 @@ Set these as Pages environment variables or secrets. Everything is optional; the
 | `GROQ_API_KEY` | AI summaries. |
 | `FINNHUB_API_KEY` | Equities lanes. |
 
+## Live
+
+<https://chainscope-8m2.pages.dev> (Pages project `chainscope`, production branch `main`).
+
 ## Verified on Pages
 
-Checked against `wrangler pages dev` (workerd), the same runtime Cloudflare uses:
+Checked against the deployed site, and before that against `wrangler pages dev` (workerd):
 
 - `/api/robinhood-chain` → 200, live chain 4663 data
 - `/api/chains-overview` → 200, 389 chains
@@ -74,6 +78,12 @@ Checked against `wrangler pages dev` (workerd), the same runtime Cloudflare uses
 - `/api/eia/foo/bar`, `/api/wingbits/details/abc123` → dispatched to the right dynamic route
 - unknown `/api/*` → 404 from the catch-all
 - full dashboard: 69 panels mounted, **0 page errors**
+
+## One trap the first deploy exposed
+
+Robinhood Chain's official RPC (`rpc.mainnet.chain.robinhood.com`) answers a Codespace fine but returns **429 to Cloudflare's edge IPs**, which are shared and heavily rate-limited upstream. The very first production request fell through to `robinhood-rpc.publicnode.com` and the panel rendered normally.
+
+This is why `/api/robinhood-chain` reports which endpoint answered in `chain.rpc` and lists the ones that did not in `chain.rpcFailures`, and why the panel footer shows `failover +N`. A single-endpoint version of this route would have looked broken on deploy for a reason that has nothing to do with the code. Any route reading a public chain from shared infrastructure needs a failover chain, not one URL.
 
 ## Other targets
 
