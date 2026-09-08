@@ -1,0 +1,11 @@
+# Cloudflare Pages configuration for Chainscope.
+#
+# Deploy:  npm run deploy:pages
+# Local:   npm run preview:pages   (runs Functions in workerd, no credentials needed)
+#
+# nodejs_compat is required: the api/ routes read configuration from process.env,
+# which the generated Function bridges from the Worker's env bindings.
+name = "chainscope"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-07"
+compatibility_flags = ["nodejs_compat"]

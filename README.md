@@ -48,6 +48,8 @@ npm run build            # Production build
 npm run test:e2e         # Playwright E2E tests
 npm run test:sidecar     # API/sidecar unit tests
 npm run test:data        # Data + config unit tests
+npm run build:pages      # Build the Cloudflare Pages Function + site
+npm run preview:pages    # Serve the Pages build locally in workerd
 ```
 
 ## Architecture
@@ -85,7 +87,18 @@ Secrets entered in the desktop Settings window are stored in the OS keychain und
 
 ## Deployment
 
-A single container serves the static Vite build and the API routes via an in-process sidecar. `GET /api/health` reports service status and upstream lane reachability. Runbook: [docs/deploy-cloud-run.md](docs/deploy-cloud-run.md).
+**Cloudflare Pages** is the primary target. The Vite build ships as static assets and the ~100 handlers in `api/` run as a single Pages Function:
+
+```bash
+npm run preview:pages   # run the real Function locally in workerd, no credentials needed
+npm run deploy:pages    # build and upload
+```
+
+Runbook: [docs/deploy-cloudflare.md](docs/deploy-cloudflare.md).
+
+**Docker / Cloud Run** is also supported: one container serves the static build and the API routes through an in-process sidecar. Runbook: [docs/deploy-cloud-run.md](docs/deploy-cloud-run.md).
+
+`GET /api/health` reports service status and upstream lane reachability on either target.
 
 ## Acknowledgements
 

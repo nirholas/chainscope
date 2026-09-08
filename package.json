@@ -37,7 +37,11 @@
     "desktop:package:windows:full:sign": "node scripts/desktop-package.mjs --os windows --variant full --sign",
     "desktop:package:windows:tech:sign": "node scripts/desktop-package.mjs --os windows --variant tech --sign",
     "desktop:package": "node scripts/desktop-package.mjs",
-    "dev:api": "node src-tauri/sidecar/local-api-server.mjs"
+    "dev:api": "node src-tauri/sidecar/local-api-server.mjs",
+    "build:functions": "node scripts/build-pages-functions.mjs",
+    "build:pages": "npm run build:functions && npm run build",
+    "preview:pages": "npm run build:pages && wrangler pages dev --port 8788",
+    "deploy:pages": "npm run build:pages && wrangler pages deploy dist --project-name chainscope --branch main --commit-dirty=true"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
@@ -50,6 +54,7 @@
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
     "vite-plugin-pwa": "^1.2.0",
+    "wrangler": "^4.129.0",
     "ws": "^8.19.0"
   },
   "dependencies": {
