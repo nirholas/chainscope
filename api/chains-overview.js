@@ -46,7 +46,7 @@ const NON_CHAIN_VENUES = new Set(['off_chain', 'edgex', 'zklighter', 'alphasec',
 
 const normalize = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
-function canonicalSlug(slug) {
+export function canonicalSlug(slug) {
   const normalized = normalize(slug);
   return SLUG_ALIASES[slug] || SLUG_ALIASES[normalized] || normalized;
 }
@@ -61,7 +61,7 @@ async function fetchJson(url, signal) {
 }
 
 /** Sum every protocol's 24h volume per chain slug. */
-function volumeByChain(dexs) {
+export function volumeByChain(dexs) {
   const totals = new Map();
   for (const protocol of dexs.protocols || []) {
     const breakdown = protocol.breakdown24h;
@@ -84,7 +84,7 @@ function volumeByChain(dexs) {
 }
 
 /** Title-case a bare slug for display when it matched no known chain name. */
-function prettifySlug(slug) {
+export function prettifySlug(slug) {
   return String(slug)
     .split(/[_\-\s]+/)
     .filter(Boolean)

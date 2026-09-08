@@ -2,7 +2,7 @@
 
 ## Project Context
 
-Chainscope HQ is a real-time DeFi crypto dashboard — a 3D WebGL globe with data overlays, panels, and AI-driven analysis. It runs standalone at `defistech.vercel.app` and also embeds inside Chainscope via iframe at the `/hq` route.
+Chainscope is an open dashboard for onchain trading: a 3D WebGL globe with data overlays, dense panels, and analysis over live market data. It runs as a web app, a PWA, and a Tauri desktop app.
 
 > **Important:** HQ was originally a geopolitical intelligence dashboard but is now a **DeFi crypto dashboard** for Chainscope. The 3D globe UI remains, and some legacy world-events layers (conflict, military, etc.) still exist in the codebase, but the mission is now **DeFi, crypto markets, protocol analytics, and blockchain data**.
 

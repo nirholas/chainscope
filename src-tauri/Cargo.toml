@@ -2,7 +2,7 @@
 name = "chainscope"
 version = "2.4.0"
 description = "Chainscope desktop application"
-authors = ["Sperax"]
+authors = ["Chainscope contributors"]
 edition = "2021"
 
 [build-dependencies]

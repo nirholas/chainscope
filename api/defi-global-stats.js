@@ -66,7 +66,7 @@ export default async function handler(req) {
     const timeout = setTimeout(() => controller.abort(), 15000);
     const opts = { signal: controller.signal, headers: { Accept: 'application/json' } };
 
-    // Parallel fetch all 5 upstream sources — same as Sperax globalStats.ts
+    // Parallel fetch across all 5 upstream sources.
     const [tvlRes, protocolsRes, dexRes, feesRes, fgRes, cgRes] = await Promise.allSettled([
       fetch('https://api.llama.fi/v2/historicalChainTvl', opts),
       fetch('https://api.llama.fi/protocols', opts),

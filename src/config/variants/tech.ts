@@ -1,4 +1,4 @@
-// Tech/AI variant - sperax.io
+// Tech/AI variant
 import type { PanelConfig, MapLayers } from '@/types';
 import type { VariantConfig } from './base';
 

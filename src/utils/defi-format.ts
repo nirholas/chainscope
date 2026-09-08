@@ -1,6 +1,6 @@
 /**
  * Shared formatting utilities for DeFi panels.
- * Precision and thresholds match Sperax source (features/Markets/widgets/helpers.ts).
+ * Precision and thresholds follow the conventions used across the market panels.
  */
 
 /**
@@ -67,7 +67,7 @@ export function pctColor(v: number | null | undefined): string {
 
 /**
  * Fear & Greed Index → label + hex color.
- * Colors match Ant Design palette used in Sperax source.
+ * Colors follow the Ant Design palette.
  */
 export function getFearGreedMeta(value: number): { color: string; label: string } {
   if (value <= 25) return { color: '#f5222d', label: 'Extreme Fear' };
@@ -153,7 +153,7 @@ export function changeHtml(val: number | null | undefined, decimals = 0): string
   return `<span class="${cls}">${sign}${n.toFixed(decimals)}%</span>`;
 }
 
-/** 10-color palette for chart bars — matches Sperax CHAIN_BAR_COLORS. */
+/** 10-color palette for chart bars, shared by every multi-series chart. */
 export const CHAIN_BAR_COLORS = [
   '#1677ff', '#722ed1', '#52c41a', '#fa8c16', '#eb2f96',
   '#13c2c2', '#faad14', '#2f54eb', '#a0d911', '#f5222d',

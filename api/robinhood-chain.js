@@ -44,7 +44,26 @@ const SELECTOR = {
 /** How far back to sample when measuring average block time. */
 const BLOCK_TIME_SAMPLE = 500;
 
-/** Send a JSON-RPC batch to one endpoint and return the responses by id. */
+/**
+ * Line up a JSON-RPC batch reply with the calls that produced it.
+ *
+ * A server may return batch responses in ANY order, so results are matched by
+ * id rather than by position: reading them positionally silently swaps fields
+ * between calls. Throws on a missing id or an error entry, because a partially
+ * satisfied batch would render a half-filled panel that looks like real data.
+ */
+export function mapBatchResults(calls, body, label = 'RPC') {
+  if (!Array.isArray(body)) throw new Error(`Non-batch reply from ${label}`);
+  const byId = new Map(body.map((r) => [r.id, r]));
+  return calls.map((_, i) => {
+    const entry = byId.get(i + 1);
+    if (!entry) throw new Error(`Missing id ${i + 1} from ${label}`);
+    if (entry.error) throw new Error(`RPC error ${entry.error.code}: ${entry.error.message}`);
+    return entry.result;
+  });
+}
+
+/** Send a JSON-RPC batch to one endpoint and return its results, in call order. */
 async function rpcBatch(endpoint, calls, signal) {
   const res = await fetch(endpoint, {
     method: 'POST',
@@ -53,15 +72,7 @@ async function rpcBatch(endpoint, calls, signal) {
     signal,
   });
   if (!res.ok) throw new Error(`RPC ${res.status} from ${endpoint}`);
-  const body = await res.json();
-  if (!Array.isArray(body)) throw new Error(`Non-batch reply from ${endpoint}`);
-  const byId = new Map(body.map((r) => [r.id, r]));
-  return calls.map((_, i) => {
-    const entry = byId.get(i + 1);
-    if (!entry) throw new Error(`Missing id ${i + 1} from ${endpoint}`);
-    if (entry.error) throw new Error(`RPC error ${entry.error.code}: ${entry.error.message}`);
-    return entry.result;
-  });
+  return mapBatchResults(calls, await res.json(), endpoint);
 }
 
 /** Try each endpoint in order; the first that answers the whole batch wins. */
@@ -78,9 +89,9 @@ async function rpcBatchWithFailover(calls, signal) {
   throw new Error(`All Robinhood Chain RPCs failed. ${failures.join(' | ')}`);
 }
 
-const hexToInt = (hex) => (hex ? Number.parseInt(hex, 16) : 0);
+export const hexToInt = (hex) => (hex ? Number.parseInt(hex, 16) : 0);
 /** Parse a uint256 hex word as a decimal number scaled by `decimals`. */
-const hexToUnits = (hex, decimals) =>
+export const hexToUnits = (hex, decimals) =>
   hex ? Number(BigInt(hex)) / 10 ** decimals : 0;
 
 function round(value, places) {

@@ -1,4 +1,4 @@
-// Full geopolitical variant - sperax.io
+// Full variant: all markets
 import type { PanelConfig, MapLayers } from '@/types';
 import type { VariantConfig } from './base';
 

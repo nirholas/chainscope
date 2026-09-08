@@ -362,14 +362,14 @@ export class App {
 
   private handleBridgeCommand(type: HQCommandType, payload: unknown): void {
     switch (type) {
-      case 'sperax:apply-template': {
+      case 'chainscope:apply-template': {
         const p = payload as Partial<ApplyTemplatePayload> | null;
         if (p && typeof p.id === 'string') {
           this.applyTemplateById(p.id);
         }
         break;
       }
-      case 'sperax:toggle-panel': {
+      case 'chainscope:toggle-panel': {
         const p = payload as Partial<TogglePanelPayload> | null;
         if (p && typeof p.key === 'string' && typeof p.enabled === 'boolean') {
           const config = this.panelSettings[p.key];
@@ -383,18 +383,18 @@ export class App {
         }
         break;
       }
-      case 'sperax:fly-to-country': {
+      case 'chainscope:fly-to-country': {
         const p = payload as Partial<FlyToCountryPayload> | null;
         if (p && typeof p.lat === 'number' && typeof p.lon === 'number') {
           this.map?.setCenter(p.lat, p.lon, typeof p.zoom === 'number' ? p.zoom : 4);
         }
         break;
       }
-      case 'sperax:set-theme': {
+      case 'chainscope:set-theme': {
         // Future: theme switching support
         break;
       }
-      case 'sperax:request-state': {
+      case 'chainscope:request-state': {
         const activeTemplateId = localStorage.getItem(STORAGE_KEYS.activeTemplate) ?? 'default';
         const btc = this.latestMarkets.find(m => m.symbol === 'BINANCE:BTCUSDT' || m.name?.toLowerCase().includes('bitcoin'));
         const topMovers = [...this.latestMarkets]
@@ -416,7 +416,7 @@ export class App {
         }
         break;
       }
-      case 'sperax:show-panel': {
+      case 'chainscope:show-panel': {
         const p = payload as Partial<ShowPanelPayload> | null;
         if (p && typeof p.key === 'string') {
           const panel = this.panels[p.key];
@@ -2444,7 +2444,7 @@ export class App {
       return new PriceAlertsPanel();
     });
 
-    // --- Crypto News & Sperax Protocol ---
+    // --- Crypto News ---
     this.lazyFactories.set('crypto-news-feed', async () => {
       const { CryptoNewsPanel } = await import('@/components/CryptoNewsPanel');
       return new CryptoNewsPanel();

@@ -12,31 +12,31 @@ const VARIANT_META: Record<string, {
   features: string[];
 }> = {
   full: {
-    title: 'Chainscope - DeFi Operating System',
-    description: 'AI-powered decentralized finance command center with real-time DeFi analytics, crypto markets, blockchain monitoring, and Web3 intelligence.',
-    keywords: 'DeFi dashboard, decentralized finance, crypto markets, blockchain analytics, Web3 intelligence, DeFi monitoring, crypto command center, on-chain data, DEX tracking, DeFi protocols, yield farming, liquidity pools, token analytics',
-    url: 'https://defis.tech/',
+    title: 'Chainscope - Onchain Trading Dashboard',
+    description: 'Open dashboard for onchain trading: perps positioning, new launches, cross-venue arbitrage, and a live overview of every chain ranked by volume, TVL and turnover.',
+    keywords: 'onchain trading dashboard, perps, funding rates, open interest, liquidations, arbitrage, cross-venue spread, DEX volume, chain TVL, turnover, new token launches, MEV, bridge flows, gas tracker, Robinhood Chain, multi-chain analytics',
+    url: 'https://github.com/nirholas/chainscope',
     siteName: 'Chainscope',
     features: [
-      'Real-time news aggregation',
-      'Stock market tracking',
-      'Military flight monitoring',
-      'Ship AIS tracking',
-      'Earthquake alerts',
-      'Protest tracking',
-      'Power outage monitoring',
-      'Oil price analytics',
-      'Government spending data',
+      'Per-chain volume, TVL and turnover',
+      'Robinhood Chain live from JSON-RPC',
+      'Perps funding, open interest and long/short',
+      'Liquidation monitoring',
+      'Cross-venue price divergence',
+      'Cross-chain fee comparison',
+      'DEX volume and trending pairs',
+      'New launch and whale tracking',
+      'Bridge and MEV monitoring',
+      'Exploit alerts and loss ledger',
+      'Token unlock schedule',
       'Prediction markets',
-      'Infrastructure monitoring',
-      'Geopolitical intelligence',
     ],
   },
   tech: {
     title: 'Tech Monitor - Real-Time AI & Tech Industry Dashboard',
     description: 'Real-time AI and tech industry dashboard tracking tech giants, AI labs, startup ecosystems, funding rounds, and tech events worldwide.',
     keywords: 'tech dashboard, AI industry, startup ecosystem, tech companies, AI labs, venture capital, tech events, tech conferences, cloud infrastructure, datacenters, tech layoffs, funding rounds, unicorns, FAANG, tech HQ, accelerators, Y Combinator, tech news',
-    url: 'https://defis.tech/',
+    url: 'https://github.com/nirholas/chainscope',
     siteName: 'Tech Monitor',
     features: [
       'Tech news aggregation',
@@ -76,9 +76,9 @@ function htmlVariantPlugin(): Plugin {
         .replace(/<meta name="twitter:title" content=".*?" \/>/, `<meta name="twitter:title" content="${meta.title}" />`)
         .replace(/<meta name="twitter:description" content=".*?" \/>/, `<meta name="twitter:description" content="${meta.description}" />`)
         .replace(/"name": "Chainscope"/, `"name": "${meta.siteName}"`)
-        .replace(/"alternateName": "DeFi Operating System"/, `"alternateName": "${meta.siteName.replace(' ', '')}"`)  
-        .replace(/"url": "https:\/\/defis\.tech\/"/, `"url": "${meta.url}"`)
-        .replace(/"description": "Real-time global intelligence dashboard with live news, markets, military tracking, infrastructure monitoring, and geopolitical data."/, `"description": "${meta.description}"`)
+        .replace(/"alternateName": ".*?"/, `"alternateName": "${meta.siteName.replace(' ', '')}"`)
+        .replace(/"url": ".*?"/, `"url": "${meta.url}"`)
+        .replace(/"description": ".*?"/, `"description": "${meta.description}"`)
         .replace(/"featureList": \[[\s\S]*?\]/, `"featureList": ${JSON.stringify(meta.features, null, 8).replace(/\n/g, '\n      ')}`);
     },
   };
@@ -285,17 +285,6 @@ export default defineConfig({
             return `/api/v3/coins/markets?${params.toString()}`;
           }
           return `/api/v3/simple/price${qs}`;
-        },
-      },
-      // Polymarket API — proxy through production Vercel edge function
-      // Direct gamma-api.polymarket.com is blocked by Cloudflare JA3 fingerprinting
-      '/api/polymarket': {
-        target: 'https://defistech.vercel.app',
-        changeOrigin: true,
-        configure: (proxy) => {
-          proxy.on('error', (err) => {
-            console.log('Polymarket proxy error:', err.message);
-          });
         },
       },
       // USGS Earthquake API

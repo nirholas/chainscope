@@ -364,14 +364,29 @@ async function tryCloudFallback(requestUrl, req, context, reason) {
   }
 }
 
+// The sidecar serves the desktop shell and local development. Extra origins come
+// from CHAINSCOPE_ALLOWED_ORIGINS (comma-separated; a leading dot also matches
+// subdomains), matching the rule the edge routes use in api/_cors.js.
 const SIDECAR_ALLOWED_ORIGINS = [
   /^tauri:\/\/localhost$/,
+  /^asset:\/\/localhost$/,
   /^https?:\/\/localhost(:\d+)?$/,
   /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
-  /^https:\/\/tauri\.localhost(:\d+)?$/,
-  /^https:\/\/(.*\.)?defis\.tech$/,
-  /^https:\/\/(.*\.)?sperax\.io$/,
-  /^https:\/\/chainscope(-[a-z0-9-]+)?\.vercel\.app$/,
+  /^https?:\/\/\[::1\](:\d+)?$/,
+  /^https:\/\/tauri\.localhost(:\d+)?$/i,
+  /^https:\/\/[a-z0-9-]+\.tauri\.localhost(:\d+)?$/i,
+  /^https:\/\/chainscope[a-z0-9-]*\.(vercel\.app|run\.app|pages\.dev)$/i,
+  ...String(process.env.CHAINSCOPE_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const escaped = (entry.startsWith('.') ? entry.slice(1) : entry)
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return entry.startsWith('.')
+        ? new RegExp(`^https?://([a-z0-9-]+\\.)*${escaped}(:\\d+)?$`, 'i')
+        : new RegExp(`^${escaped}$`, 'i');
+    }),
 ];
 
 function getSidecarCorsOrigin(req) {

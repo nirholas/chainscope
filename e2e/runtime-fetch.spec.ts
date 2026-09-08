@@ -54,8 +54,8 @@ test.describe('desktop runtime routing guardrails', () => {
           hasTauriGlobals: false,
           userAgent: 'Mozilla/5.0',
           locationProtocol: 'https:',
-          locationHost: 'defis.tech',
-          locationOrigin: 'https://defis.tech',
+          locationHost: 'chainscope.local',
+          locationOrigin: 'https://chainscope.local',
         }),
       };
     });
@@ -98,14 +98,14 @@ test.describe('desktop runtime routing guardrails', () => {
         if (url.includes('127.0.0.1:46123/api/earthquakes')) {
           return responseJson({ error: 'local unavailable' }, 500);
         }
-        if (url.includes('defis.tech/api/earthquakes')) {
+        if (url.includes('chainscope.local/api/earthquakes')) {
           return responseJson({ features: [{ id: 'eq1' }] }, 200);
         }
 
         if (url.includes('127.0.0.1:46123/api/stablecoin-markets')) {
           throw new Error('ECONNREFUSED');
         }
-        if (url.includes('defis.tech/api/stablecoin-markets')) {
+        if (url.includes('chainscope.local/api/stablecoin-markets')) {
           return responseJson({ stablecoins: [{ symbol: 'USDT' }] }, 200);
         }
 
@@ -149,8 +149,8 @@ test.describe('desktop runtime routing guardrails', () => {
     expect(result.stableSymbol).toBe('USDT');
 
     expect(result.calls.some((url) => url.includes('127.0.0.1:46123/api/earthquakes'))).toBe(true);
-    expect(result.calls.some((url) => url.includes('defis.tech/api/earthquakes'))).toBe(true);
+    expect(result.calls.some((url) => url.includes('chainscope.local/api/earthquakes'))).toBe(true);
     expect(result.calls.some((url) => url.includes('127.0.0.1:46123/api/stablecoin-markets'))).toBe(true);
-    expect(result.calls.some((url) => url.includes('defis.tech/api/stablecoin-markets'))).toBe(true);
+    expect(result.calls.some((url) => url.includes('chainscope.local/api/stablecoin-markets'))).toBe(true);
   });
 });

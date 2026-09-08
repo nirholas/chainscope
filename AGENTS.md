@@ -4,7 +4,7 @@ This document serves as a comprehensive guide for all contributors and AI agents
 
 ## Project Description
 
-Chainscope HQ is a real-time DeFi crypto dashboard — a visually rich command center with an interactive 3D globe, live market data, protocol analytics, and AI-powered analysis. It is the front-end for [Chainscope](https://github.com/nirholas/sperax) (an AI Agent Workspace for DeFi), embedded via iframe at the `/hq` route, and also runs standalone at [defistech.vercel.app](https://defistech.vercel.app).
+Chainscope is an open dashboard for onchain trading: a dense command center covering perps positioning, new launches, cross-venue arbitrage, and a live overview of every chain. It runs as a web app, a PWA, and a Tauri desktop app.
 
 > **Important for agents:** HQ was originally built as a geopolitical intelligence dashboard, but has since been repurposed as a **DeFi crypto dashboard** for Chainscope. The 3D globe UI remains, and some legacy world-events layers (conflict, military, etc.) still exist in the codebase, but the product's mission is now **DeFi, crypto markets, protocol analytics, and blockchain data**. Prioritize DeFi features over legacy geopolitical ones.
 
@@ -306,10 +306,9 @@ export default async function handler(req, res) {
 
 Chainscope HQ is embedded inside Chainscope as an iframe at the `/hq` route. The integration works as follows:
 
-- **Chainscope** (`nirholas/sperax`): The main AI Agent Workspace — React 19, Next.js 16, Zustand, PostgreSQL. Has chat, agents, dashboard, portfolio, markets, news, DeFi pages.
+
 - **HQ** (`nirholas/HQ`): This repo. The DeFi dashboard — real-time globe with crypto/market data layers, standalone vanilla TS app.
 - **Communication**: `postMessage` bridge between iframe (HQ) and parent (Chainscope). HQ emits events; Chainscope listens and can route to AI chat.
-- **Standalone**: HQ also runs independently at `defistech.vercel.app` without requiring Chainscope login.
 
 ### Chainscope Context
 

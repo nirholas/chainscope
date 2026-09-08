@@ -6,33 +6,34 @@
  */
 
 // ---------------------------------------------------------------------------
-// Allowed origins — must match frame-ancestors in vercel.json
+// Allowed embedding origins
+//
+// Deployments declare their own hosts in VITE_TRUSTED_PARENT_ORIGINS
+// (comma-separated exact origins), which should agree with frame-ancestors in
+// vercel.json. Local development is always allowed so a fresh clone works.
 // ---------------------------------------------------------------------------
-const ALLOWED_ORIGINS: readonly string[] = [
-  'https://sperax.live',
-  'https://beta.sperax.chat',
-  'https://sperax.chat',
-  'https://chainscope.vercel.app',
-  'https://sperax.click',
-  'https://sperax.xyz',
-  'https://chat.sperax.io',
-  'http://localhost:3000', // Chainscope dev
-  'http://localhost:3001',
-  'http://localhost:3210',
-];
+const ALLOWED_ORIGINS: readonly string[] = (import.meta.env.VITE_TRUSTED_PARENT_ORIGINS || '')
+  .split(',')
+  .map((origin: string) => origin.trim())
+  .filter(Boolean);
+
+/** Local development hosts, allowed on any port. */
+const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/;
 
 /**
- * Check if an origin matches any allowed origin.
- * Supports exact matches plus wildcard *.vercel.app for preview deployments.
+ * Preview deployments of THIS project only.
+ *
+ * Note the `chainscope` prefix: matching every `*.vercel.app` host would let any
+ * page deployed to that shared domain frame the dashboard and drive it over
+ * postMessage, which is not a trust boundary at all.
  */
+const PREVIEW_ORIGIN = /^https:\/\/chainscope[a-z0-9-]*\.(vercel\.app|run\.app|pages\.dev)$/i;
+
 function isAllowedOrigin(origin: string): boolean {
+  if (!origin) return false;
+  if (origin === window.location.origin) return true;
   if (ALLOWED_ORIGINS.includes(origin)) return true;
-  try {
-    const url = new URL(origin);
-    return url.protocol === 'https:' && url.hostname.endsWith('.vercel.app');
-  } catch {
-    return false;
-  }
+  return LOCAL_ORIGIN.test(origin) || PREVIEW_ORIGIN.test(origin);
 }
 
 // ---------------------------------------------------------------------------
@@ -51,19 +52,19 @@ export type HQEventType =
 
 /** Commands received by HQ ← Chainscope */
 export type HQCommandType =
-  | 'sperax:apply-template'
-  | 'sperax:toggle-panel'
-  | 'sperax:fly-to-country'
-  | 'sperax:set-theme'
-  | 'sperax:request-state'
-  | 'sperax:show-panel';
+  | 'chainscope:apply-template'
+  | 'chainscope:toggle-panel'
+  | 'chainscope:fly-to-country'
+  | 'chainscope:set-theme'
+  | 'chainscope:request-state'
+  | 'chainscope:show-panel';
 
 export interface HQMessage<T = unknown> {
   type: HQEventType;
   payload: T;
 }
 
-export interface SperaxCommand<T = unknown> {
+export interface ChainscopeCommand<T = unknown> {
   type: HQCommandType;
   payload: T;
 }
@@ -246,12 +247,15 @@ class HQBridge {
 
     if (this.parentOrigin) {
       window.parent.postMessage(message, this.parentOrigin);
-    } else {
-      // Parent origin unknown yet — broadcast to all allowed origins.
-      // Only one will succeed (browser silently drops mismatches).
-      for (const origin of ALLOWED_ORIGINS) {
-        window.parent.postMessage(message, origin);
-      }
+      return;
+    }
+
+    // Parent origin not yet learned from an inbound message. Fall back to the
+    // referrer when it is an origin we already trust; otherwise stay silent
+    // rather than spraying the payload at every candidate host.
+    const referrerOrigin = document.referrer ? new URL(document.referrer).origin : '';
+    if (referrerOrigin && isAllowedOrigin(referrerOrigin)) {
+      window.parent.postMessage(message, referrerOrigin);
     }
   }
 
@@ -313,8 +317,8 @@ class HQBridge {
     const data = event.data;
     if (!data || typeof data !== 'object' || typeof data.type !== 'string') return;
 
-    // 4. Only handle sperax: prefixed commands
-    if (!data.type.startsWith('sperax:')) return;
+    // 4. Only handle chainscope: prefixed commands
+    if (!data.type.startsWith('chainscope:')) return;
 
     // 5. Rate limit
     if (!this.limiter.allow()) {
