@@ -2,6 +2,7 @@
   "name": "chainscope",
   "private": true,
   "version": "2.4.0",
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "lint:md": "markdownlint-cli2 '**/*.md'",

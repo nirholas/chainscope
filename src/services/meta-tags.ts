@@ -96,7 +96,7 @@ function generateDescription(
     parts.push(typeDescriptions[type]);
   }
   
-  return `Chainscope ${parts.join('. ')}. Free, open-source decentralized finance intelligence.`;
+  return `Chainscope ${parts.join('. ')}. Real-time decentralized finance intelligence.`;
 }
 
 function setMetaTag(property: string, content: string): void {

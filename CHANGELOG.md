@@ -2,6 +2,13 @@
 
 All notable changes to Chainscope are documented here.
 
+## [Unreleased]
+
+### Changed
+
+- **Chainscope is now proprietary**: the project is licensed All Rights Reserved (`LICENSE`) instead of MIT. No permission is granted to use, copy, modify, or distribute the software without written consent. Portions inherited from the upstream worldmonitor fork remain available under the MIT License from their original source, and third-party dependencies keep their own licenses
+- Removed the "free and open source" claims from share cards, social meta tags and the story OG image, which the licence change made untrue
+
 ## [2.4.1] - 2026-08-01
 
 ### Fixed

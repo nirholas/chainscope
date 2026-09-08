@@ -59,7 +59,7 @@ export const shareTexts = {
     `• Score: ${data.cii?.score || 'N/A'}/100 (${data.cii?.level || 'N/A'})\n` +
     `• 24h change: ${data.cii?.change24h ? (data.cii.change24h > 0 ? '+' : '') + data.cii.change24h : 'N/A'}%\n` +
     `${data.threats.critical > 0 ? `• Critical threats: ${data.threats.critical}\n` : ''}` +
-    `\nData via Chainscope - Open source decentralized finance intelligence`,
+    `\nData via Chainscope - decentralized finance intelligence`,
 
   telegram: (data: StoryData) =>
     `${countryFlag(data.countryCode)} *${data.countryName} DeFi Analysis*\n\n` +

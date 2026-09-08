@@ -1,16 +1,32 @@
-MIT License
+Chainscope
 
-Copyright (c) 2025-2026 nich
+Copyright (c) 2025-2026 nich. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software and its source code, documentation, design, and associated
+materials (the "Software") are proprietary and confidential. No license,
+express or implied, is granted to any person by the publication of this
+Software or by its availability in any repository, package registry, or
+distribution channel.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Without the prior written permission of the copyright holder, you may not:
+
+  1. use, run, or execute the Software, in whole or in part;
+  2. copy, reproduce, or store the Software;
+  3. modify, adapt, translate, or create derivative works of the Software;
+  4. distribute, publish, sublicense, sell, rent, or lease the Software;
+  5. reverse engineer, decompile, or disassemble any compiled form of the
+     Software, except to the extent that applicable law expressly permits it
+     notwithstanding this restriction;
+  6. remove or alter any copyright, trademark, or other proprietary notice.
+
+Viewing the source for the sole purpose of evaluating it is permitted. Every
+other right is reserved.
+
+Third-party components distributed with or depended upon by the Software
+remain governed by their own licenses. Portions of this codebase derive from
+worldmonitor (https://github.com/koala73/worldmonitor), which is licensed
+under the MIT License; those portions remain available under the MIT License
+from their original source, and the terms above apply to this work as a whole.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

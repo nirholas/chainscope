@@ -3829,7 +3829,7 @@ PRs that don't follow the code style or introduce security issues will be asked 
 
 ## License
 
-MIT
+Proprietary. Copyright (c) 2025-2026 nich. All rights reserved. See LICENSE.
 
 ## Author
 
@@ -3837,4 +3837,4 @@ MIT
 
 ---
 
-*Built for situational awareness and open-source intelligence gathering.*
+*Built for situational awareness and open-source intelligence (OSINT) gathering. Chainscope itself is proprietary software.*

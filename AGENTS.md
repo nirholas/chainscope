@@ -8,7 +8,7 @@ Chainscope is an open dashboard for onchain trading: a dense command center cove
 
 > **Important for agents:** HQ was originally built as a geopolitical intelligence dashboard, but has since been repurposed as a **DeFi crypto dashboard** for Chainscope. The 3D globe UI remains, and some legacy world-events layers (conflict, military, etc.) still exist in the codebase, but the product's mission is now **DeFi, crypto markets, protocol analytics, and blockchain data**. Prioritize DeFi features over legacy geopolitical ones.
 
-**License**: MIT
+**License**: Proprietary - All rights reserved (see [LICENSE](LICENSE))
 
 ## Tech Stack
 

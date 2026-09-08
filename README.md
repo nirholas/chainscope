@@ -102,8 +102,8 @@ Runbook: [docs/deploy-cloudflare.md](docs/deploy-cloudflare.md).
 
 ## Acknowledgements
 
-Chainscope descends from a DeFi intelligence dashboard that itself began as a fork of [worldmonitor](https://github.com/koala73/worldmonitor) (MIT), and has been rebuilt around onchain trading.
+Chainscope descends from a DeFi intelligence dashboard that itself began as a fork of [worldmonitor](https://github.com/koala73/worldmonitor) (MIT), and has been rebuilt around onchain trading. Those upstream portions remain available under the MIT License from their original source.
 
 ## License
 
-[MIT](LICENSE)
+Proprietary. Copyright (c) 2025-2026 nich. All rights reserved: see [LICENSE](LICENSE). No permission is granted to use, copy, modify, or distribute this software without prior written consent.

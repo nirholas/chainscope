@@ -38,7 +38,7 @@ export default function handler(req, res) {
   // Bots → serve meta tags
   const countryName = COUNTRY_NAMES[countryCode] || countryCode || 'Global';
   const title = `${countryName} Intelligence Brief | Chainscope`;
-  const description = `Real-time instability analysis for ${countryName}. Country Instability Index, military posture, threat classification, and prediction markets. Free, open-source geopolitical intelligence.`;
+  const description = `Real-time instability analysis for ${countryName}. Country Instability Index, military posture, threat classification, and prediction markets. Real-time geopolitical intelligence.`;
   const imageParams = `c=${countryCode}&t=${type}${score ? `&s=${score}` : ''}${level ? `&l=${level}` : ''}`;
   const imageUrl = `${baseUrl}/api/og-story?${imageParams}`;
   const storyUrl = `${baseUrl}/api/story?c=${countryCode}&t=${type}${ts ? `&ts=${ts}` : ''}`;
