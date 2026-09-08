@@ -1,6 +1,6 @@
 # Chainscope
 
-An open dashboard for onchain trading. Perps, trenches, arbitrage and a live overview of every chain, on one screen.
+A dashboard for onchain trading. Perps, trenches, arbitrage and a live overview of every chain, on one screen.
 
 **Live:** <https://chainscope-8m2.pages.dev>
 
@@ -105,7 +105,11 @@ Runbook: [docs/deploy-cloudflare.md](docs/deploy-cloudflare.md).
 
 ## Acknowledgements
 
-Chainscope descends from a DeFi intelligence dashboard that itself began as a fork of [worldmonitor](https://github.com/koala73/worldmonitor) (MIT), and has been rebuilt around onchain trading. Those upstream portions remain available under the MIT License from their original source.
+Chainscope descends from a DeFi intelligence dashboard that itself began as a fork of [worldmonitor](https://github.com/koala73/worldmonitor) by Elie Habib, and has been rebuilt around onchain trading.
+
+Those portions were obtained while worldmonitor was MIT-licensed (its MIT LICENSE was added 2026-02-13; this codebase was separated 2026-02-16) and the MIT grant continues to apply to them. Its full notice is reproduced in [LICENSE](LICENSE), as MIT requires.
+
+**worldmonitor has since relicensed to AGPL-3.0** (2026-02-19). Anything taken from it on or after that date is AGPL-3.0, not MIT, and is not covered by that notice. Check before pulling anything further from upstream.
 
 ## License
 

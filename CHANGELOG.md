@@ -6,8 +6,10 @@ All notable changes to Chainscope are documented here.
 
 ### Changed
 
-- **Chainscope is now proprietary**: the project is licensed All Rights Reserved (`LICENSE`) instead of MIT. No permission is granted to use, copy, modify, or distribute the software without written consent. Portions inherited from the upstream worldmonitor fork remain available under the MIT License from their original source, and third-party dependencies keep their own licenses
+- **Chainscope is now proprietary**: the project is licensed All Rights Reserved (`LICENSE`) instead of MIT. No permission is granted to use, copy, modify, or distribute the software without written consent. Portions inherited from the upstream worldmonitor fork were obtained under the MIT License and keep that grant; third-party dependencies keep their own licenses
 - Removed the "free and open source" claims from share cards, social meta tags and the story OG image, which the licence change made untrue
+- **Corrected the upstream attribution**: the previous notice said worldmonitor's portions "remain available under the MIT License from their original source", which is no longer true. worldmonitor relicensed to AGPL-3.0 on 2026-02-19. The MIT grant still covers the portions obtained before that (this codebase was separated 2026-02-16), and `LICENSE` now reproduces the MIT copyright and permission notice in full, as MIT requires it to. Anything pulled from worldmonitor from 2026-02-19 onward is AGPL-3.0 and is not covered
+- Dropped "open" from the project tagline, which read as an open-source claim the licence does not support
 
 ## [2.4.1] - 2026-08-01
 
