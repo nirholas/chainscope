@@ -50,6 +50,7 @@ npm run build            # Production build
 npm run test:e2e         # Playwright E2E tests
 npm run test:sidecar     # API/sidecar unit tests
 npm run test:data        # Data + config unit tests
+npm run check:live-channels  # Verify the Live News YouTube handles still resolve
 npm run build:pages      # Build the Cloudflare Pages Function + site
 npm run preview:pages    # Serve the Pages build locally in workerd
 ```

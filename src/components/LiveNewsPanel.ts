@@ -50,24 +50,31 @@ interface LiveChannel {
 
 const SITE_VARIANT = import.meta.env.VITE_VARIANT || 'full';
 
-// Full variant: World news channels (24/7 live streams)
+// A channel's LIVE stream is resolved from its handle at runtime; fallbackVideoId
+// is only used when that lookup finds nothing. Handles are the durable half and
+// fallbacks rot, so `npm run check:live-channels` verifies both against YouTube
+// and prints the replacements when one goes stale.
+//
+// Full variant: world and business news channels (24/7 live streams)
 const FULL_LIVE_CHANNELS: LiveChannel[] = [
-  { id: 'bloomberg', name: 'Bloomberg', handle: '@Bloomberg', fallbackVideoId: 'iEpJwprxDdk' },
-  { id: 'sky', name: 'SkyNews', handle: '@SkyNews', fallbackVideoId: 'YDvsBbKfLPA' },
-  { id: 'euronews', name: 'Euronews', handle: '@euabortnews', fallbackVideoId: 'pykpO5kQJ98' },
+  // Bloomberg's live stream lives on @markets (Bloomberg Television), not on
+  // @Bloomberg, which carries clips and resolves to no live video.
+  { id: 'bloomberg', name: 'Bloomberg', handle: '@markets', fallbackVideoId: 'QB5BNdBFujE' },
+  { id: 'sky', name: 'SkyNews', handle: '@SkyNews', fallbackVideoId: 'xDWQ3LkccY8' },
+  { id: 'euronews', name: 'Euronews', handle: '@euronews', fallbackVideoId: 'IbqGhkPyG38' },
   { id: 'dw', name: 'DW', handle: '@DWNews', fallbackVideoId: 'LuKwFajn37U' },
   { id: 'cnbc', name: 'CNBC', handle: '@CNBC', fallbackVideoId: '9NyxcX3rhQs' },
-  { id: 'france24', name: 'France24', handle: '@FRANCE24English', fallbackVideoId: 'Ap-UM1O9RBU' },
-  { id: 'alarabiya', name: 'AlArabiya', handle: '@AlArabiya', fallbackVideoId: 'n7eQejkXbnM', useFallbackOnly: true },
-  { id: 'aljazeera', name: 'AlJazeera', handle: '@AlJazeeraEnglish', fallbackVideoId: 'gCNeDWCI0vo', useFallbackOnly: true },
+  { id: 'france24', name: 'France24', handle: '@France24_en', fallbackVideoId: 'HvZt-nh9sGg' },
+  { id: 'alarabiya', name: 'AlArabiya', handle: '@AlArabiya', fallbackVideoId: 'n7eQejkXbnM' },
+  { id: 'aljazeera', name: 'AlJazeera', handle: '@AlJazeeraEnglish', fallbackVideoId: 'gCNeDWCI0vo' },
 ];
 
-// Tech variant: Tech & business channels
+// Tech variant: tech and business channels
 const TECH_LIVE_CHANNELS: LiveChannel[] = [
-  { id: 'bloomberg', name: 'Bloomberg', handle: '@Bloomberg', fallbackVideoId: 'iEpJwprxDdk' },
-  { id: 'yahoo', name: 'Yahoo Finance', handle: '@YahooFinance', fallbackVideoId: 'KQp-e_XQnDE' },
+  { id: 'bloomberg', name: 'Bloomberg', handle: '@markets', fallbackVideoId: 'QB5BNdBFujE' },
+  { id: 'yahoo', name: 'Yahoo Finance', handle: '@YahooFinance', fallbackVideoId: 'r5Tdhv8reJU' },
   { id: 'cnbc', name: 'CNBC', handle: '@CNBC', fallbackVideoId: '9NyxcX3rhQs' },
-  { id: 'nasa', name: 'NASA TV', handle: '@NASA', fallbackVideoId: 'fO9e9jnhYK8', useFallbackOnly: true },
+  { id: 'nasa', name: 'NASA TV', handle: '@NASA', fallbackVideoId: 'M3HKLzjvKPc' },
 ];
 
 const LIVE_CHANNELS = SITE_VARIANT === 'tech' ? TECH_LIVE_CHANNELS : FULL_LIVE_CHANNELS;

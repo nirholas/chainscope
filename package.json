@@ -42,7 +42,8 @@
     "build:functions": "node scripts/build-pages-functions.mjs",
     "build:pages": "npm run build:functions && npm run build",
     "preview:pages": "npm run build:pages && wrangler pages dev --port 8788",
-    "deploy:pages": "npm run build:pages && wrangler pages deploy dist --project-name chainscope --branch main --commit-dirty=true"
+    "deploy:pages": "npm run build:pages && wrangler pages deploy dist --project-name chainscope --branch main --commit-dirty=true",
+    "check:live-channels": "node scripts/check-live-channels.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
