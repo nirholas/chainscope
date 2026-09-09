@@ -1,6 +1,6 @@
 import { Panel } from './Panel';
 import { escapeHtml } from '@/utils/sanitize';
-import type { MevMonitorResult, MevBlock, MevSandwich, MevBuilderShare } from '@/types';
+import type { MevMonitorResult, MevBlock, MevBuilderShare } from '@/types';
 
 /* ── Helpers ── */
 
@@ -124,24 +124,15 @@ export class MevMonitorPanel extends Panel {
     }
 
     const d = this.data;
-    const unavailable = (d as any).unavailable;
-
-    if (unavailable) {
-      this.setDataBadge('unavailable', 'Flashbots API unavailable');
-    } else {
-      this.setDataBadge('live');
-    }
-
-    if (d.recentBlocks.length > 0) {
-      this.setCount(d.recentBlocks.length);
-    }
+    this.setDataBadge('live');
+    if (d.window.payloadCount > 0) this.setCount(d.window.payloadCount);
 
     const html = `
       <div class="mev-container">
         ${this.renderStats(d)}
         ${this.renderBuilderShare(d.builderShare)}
-        ${this.renderRecentBlocks(d.recentBlocks)}
-        ${this.renderSandwiches(d.topSandwiches)}
+        ${this.renderRecentBlocks(d.blocks)}
+        ${this.renderSource(d)}
       </div>
     `;
     this.setContent(html);
@@ -151,23 +142,25 @@ export class MevMonitorPanel extends Panel {
 
   private renderStats(d: MevMonitorResult): string {
     const s = d.stats;
+    const hours = d.window.seconds / 3600;
+    const usd = (value: number | null) => (value == null ? 'n/a' : formatUSD(value));
     return `
       <div class="mev-stats-grid">
         <div class="mev-stat-card">
-          <span class="mev-stat-value">${escapeHtml(formatUSD(s.totalMev24h))}</span>
-          <span class="mev-stat-label">MEV Extracted (24h)</span>
+          <span class="mev-stat-value">${escapeHtml(usd(s.totalProposerPaymentUSD))}</span>
+          <span class="mev-stat-label" title="Total paid to proposers across the sampled payloads">Paid to Proposers (${hours.toFixed(0)}h)</span>
         </div>
         <div class="mev-stat-card">
-          <span class="mev-stat-value">${escapeHtml(formatETH(s.avgMevPerBlock))}</span>
-          <span class="mev-stat-label">Avg MEV / Block</span>
+          <span class="mev-stat-value">${escapeHtml(formatETH(s.avgProposerPaymentEth))}</span>
+          <span class="mev-stat-label">Avg / Block</span>
         </div>
         <div class="mev-stat-card">
-          <span class="mev-stat-value mev-sandwich-accent">${(d.summary.sandwichRate * 100).toFixed(1)}%</span>
-          <span class="mev-stat-label">Sandwich Rate</span>
+          <span class="mev-stat-value">${d.window.payloadCount.toLocaleString()}</span>
+          <span class="mev-stat-label">Payloads Sampled</span>
         </div>
         <div class="mev-stat-card">
-          <span class="mev-stat-value mev-arb-accent">${escapeHtml(formatUSD(s.arbitrageProfit24h))}</span>
-          <span class="mev-stat-label">Arb Profit (24h)</span>
+          <span class="mev-stat-value mev-arb-accent">${s.builderDominance.toFixed(1)}%</span>
+          <span class="mev-stat-label" title="Share of sampled blocks built by the top builder">Top Builder Share</span>
         </div>
       </div>
     `;
@@ -207,21 +200,24 @@ export class MevMonitorPanel extends Panel {
   /* ── Section 3: Recent MEV Blocks ── */
 
   private renderRecentBlocks(blocks: MevBlock[]): string {
-    if (!blocks || blocks.length === 0) return '';
+    if (!blocks || blocks.length === 0) {
+      return `
+        <div class="mev-section">
+          <div class="mev-section-title">Recent Delivered Blocks</div>
+          <div class="mev-empty">The relay reported no delivered payloads in this window.</div>
+        </div>
+      `;
+    }
 
     const rows = blocks
       .slice(0, 10)
       .map(
         (b, i) => `
       <div class="mev-block-row${i % 2 === 0 ? ' mev-block-even' : ''}">
-        <span class="mev-block-num">#${b.blockNumber.toLocaleString()}</span>
-        <span class="mev-block-reward" style="color:${mevColor(b.mevRewardUSD)}">${formatETH(b.mevReward)}</span>
-        <span class="mev-block-builder">${escapeHtml(b.builderName)}</span>
-        <span class="mev-block-meta">
-          ${b.sandwichCount > 0 ? `<span class="mev-tag mev-tag-sandwich" title="Sandwich attacks">${b.sandwichCount} 🥪</span>` : ''}
-          ${b.arbitrageCount > 0 ? `<span class="mev-tag mev-tag-arb" title="Arbitrage txs">${b.arbitrageCount} ⚡</span>` : ''}
-          ${b.liquidationCount > 0 ? `<span class="mev-tag mev-tag-liq" title="Liquidations">${b.liquidationCount} 💧</span>` : ''}
-        </span>
+        <a class="mev-block-num" href="https://etherscan.io/block/${b.blockNumber}" target="_blank" rel="noopener noreferrer">#${b.blockNumber.toLocaleString()}</a>
+        <span class="mev-block-reward"${b.proposerPaymentUSD != null ? ` style="color:${mevColor(b.proposerPaymentUSD)}"` : ''}>${escapeHtml(formatETH(b.proposerPaymentEth))}</span>
+        <span class="mev-block-builder" title="${escapeHtml(b.builderPubkey)}">${escapeHtml(b.builderName)}</span>
+        <span class="mev-block-meta">${b.txCount.toLocaleString()} tx</span>
         <span class="mev-block-time">${timeAgo(b.timestamp)}</span>
       </div>`,
       )
@@ -229,50 +225,27 @@ export class MevMonitorPanel extends Panel {
 
     return `
       <div class="mev-section">
-        <div class="mev-section-title">Recent MEV Blocks</div>
+        <div class="mev-section-title">Recent Delivered Blocks</div>
         <div class="mev-block-list">${rows}</div>
       </div>
     `;
   }
 
-  /* ── Section 4: Top Sandwich Attacks ── */
+  /* ── Section 4: Where these numbers come from ── */
 
-  private renderSandwiches(sandwiches: MevSandwich[]): string {
-    if (!sandwiches || sandwiches.length === 0) {
-      return `
-        <div class="mev-section">
-          <div class="mev-section-title">Top Sandwich Attacks</div>
-          <div class="mev-empty">No sandwich attacks detected in recent blocks</div>
-        </div>
-      `;
-    }
-
-    const rows = sandwiches
-      .slice(0, 5)
-      .map(
-        (s) => `
-      <div class="mev-sandwich-item">
-        <div class="mev-sandwich-header">
-          <a class="mev-etherscan-link" href="https://etherscan.io/tx/${encodeURIComponent(s.hash)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(s.hash)}">
-            ${escapeHtml(truncateHash(s.hash))}
-          </a>
-          <span class="mev-sandwich-profit">+${escapeHtml(formatUSD(s.profitUSD))}</span>
-        </div>
-        <div class="mev-sandwich-detail">
-          Victim swapped <strong>${escapeHtml(String(s.victimSwap.amount))}</strong>
-          <strong>${escapeHtml(s.victimSwap.token)}</strong> on ${escapeHtml(s.victimSwap.dex)}
-        </div>
-        <div class="mev-sandwich-footer">
-          Block #${s.blockNumber.toLocaleString()} · ${timeAgo(s.timestamp)}
-        </div>
-      </div>`,
-      )
-      .join('');
-
+  private renderSource(d: MevMonitorResult): string {
+    const priceNote = d.source.ethPriceUnavailable
+      ? 'USD figures unavailable: no price lane answered.'
+      : `ETH at ${formatUSD(d.source.ethPriceUSD ?? 0)}.`;
     return `
-      <div class="mev-section">
-        <div class="mev-section-title">Top Sandwich Attacks</div>
-        ${rows}
+      <div class="mev-section mev-source">
+        <div class="mev-source-line">Relay: ${escapeHtml(d.source.relay)}. ${escapeHtml(priceNote)}</div>
+        <div class="mev-source-note">${escapeHtml(d.source.note)}</div>
+        ${
+          d.source.relayFailures.length
+            ? `<div class="mev-source-note" title="${escapeHtml(d.source.relayFailures.join(' | '))}">Failed over past ${d.source.relayFailures.length} relay(s).</div>`
+            : ''
+        }
       </div>
     `;
   }

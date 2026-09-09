@@ -24,8 +24,10 @@ const LEVEL_LABELS = {
   low: 'LOW RISK',
 };
 
-export default function handler(req, res) {
-  const url = new URL(req.url, `https://${req.headers.host}`);
+export const config = { runtime: 'edge' };
+
+export default function handler(req) {
+  const url = new URL(req.url);
   const countryCode = (url.searchParams.get('c') || '').toUpperCase();
   const type = url.searchParams.get('t') || 'ciianalysis';
   const score = url.searchParams.get('s');
@@ -214,9 +216,13 @@ export default function handler(req, res) {
     >chainscope · ${dateStr}</text>
 </svg>`;
 
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=600');
-  res.status(200).send(svg);
+  return new Response(svg, {
+    status: 200,
+    headers: {
+      'Content-Type': 'image/svg+xml',
+      'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=600',
+    },
+  });
 }
 
 function escapeXml(str) {

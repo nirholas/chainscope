@@ -263,9 +263,15 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { ...cors, 'Content-Type': 'application/json' } });
   }
 
-  // Rate limiting
-  const rl = await limiter(req);
-  if (rl) return rl;
+  // createIpRateLimiter returns { check, size }; calling it directly threw
+  // "limiter is not a function" on every request and 500'd the whole route.
+  const clientIp = (req.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim();
+  if (!limiter.check(clientIp)) {
+    return new Response(JSON.stringify({ error: 'Too many requests' }), {
+      status: 429,
+      headers: { ...cors, 'Content-Type': 'application/json', 'Retry-After': '60' },
+    });
+  }
 
   // In-memory cache check
   const now = Date.now();

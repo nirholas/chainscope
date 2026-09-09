@@ -2,169 +2,176 @@ export const config = { runtime: 'edge' };
 
 import { getCorsHeaders, isDisallowedOrigin } from './_cors.js';
 import { createIpRateLimiter } from './_ip-rate-limit.js';
+import { UA_BOT } from './_ua.js';
 
 const limiter = createIpRateLimiter({ limit: 30, windowMs: 60_000 });
-const CACHE_TTL = 120; // 2 min — MEV data is time-sensitive
-let cachedResponse = null;
-let cacheTimestamp = 0;
+const CACHE_TTL = 120; // 2 min: relay payloads land every slot.
 
-/* Builder colour palette (deterministic) */
-const BUILDER_COLORS = {
-  beaverbuild: '#f59e0b',
-  'Titan Builder': '#8b5cf6',
-  Titan: '#8b5cf6',
-  rsync: '#10b981',
-  flashbots: '#3b82f6',
-  bloxroute: '#ef4444',
-  'builder0x69': '#ec4899',
-  buildAI: '#06b6d4',
+/** In-memory stale fallback, so a warm instance survives an upstream outage. */
+let staleResponse = null;
+
+/**
+ * MEV-Boost relay payload traces.
+ *
+ * The previous source, blocks.flashbots.net, was decommissioned and now answers
+ * HTTP 410; the libmev secondary is unreachable as well. The relay data API is
+ * the keyless replacement, and it reports what a relay actually delivered:
+ * the payment to the proposer, the builder, and the block's gas and tx count.
+ *
+ * Every relay only wins a fraction of blocks, so these figures describe THIS
+ * relay's delivered payloads, not network-wide MEV. The response says so rather
+ * than implying full coverage.
+ */
+const RELAYS = [
+  { name: 'Flashbots', url: 'https://boost-relay.flashbots.net' },
+  { name: 'bloXroute Max Profit', url: 'https://bloxroute.max-profit.blxrbdn.com' },
+  { name: 'Agnostic', url: 'https://agnostic-relay.net' },
+];
+
+const PAYLOAD_PATH = '/relay/v1/data/bidtraces/proposer_payload_delivered?limit=200';
+
+/** Beacon chain genesis (mainnet) and slot length, used to date a slot. */
+const GENESIS_UNIX = 1606824023;
+const SECONDS_PER_SLOT = 12;
+
+/**
+ * Builders are identified only by pubkey here. There is no keyless registry
+ * mapping those to the names people know ("beaverbuild", "Titan"), and guessing
+ * would put unverified attribution on screen, so the pubkey is shown truncated.
+ */
+function builderLabel(pubkey) {
+  if (!pubkey) return 'unknown';
+  return `${pubkey.slice(0, 10)}...${pubkey.slice(-4)}`;
+}
+
+const slotToIso = (slot) =>
+  new Date((GENESIS_UNIX + Number(slot) * SECONDS_PER_SLOT) * 1000).toISOString();
+
+const round = (value, places) => {
+  const factor = 10 ** places;
+  return Math.round(value * factor) / factor;
 };
 
-function buildFallbackResult() {
-  return {
-    timestamp: new Date().toISOString(),
-    recentBlocks: [],
-    stats: {
-      totalMev24h: 0,
-      avgMevPerBlock: 0,
-      topBuilder: 'unknown',
-      builderDominance: 0,
-      sandwichVolume24h: 0,
-      arbitrageProfit24h: 0,
+/** Live ETH price, with a failover. Never a hardcoded constant. */
+async function fetchEthPrice(signal) {
+  const lanes = [
+    {
+      url: 'https://coins.llama.fi/prices/current/coingecko:ethereum',
+      read: (d) => d?.coins?.['coingecko:ethereum']?.price,
     },
-    topSandwiches: [],
-    builderShare: [],
-    summary: {
-      totalBlocks: 0,
-      avgMevUSD: 0,
-      sandwichRate: 0,
-      topMevType: 'unknown',
+    {
+      url: 'https://api.coinpaprika.com/v1/tickers/eth-ethereum',
+      read: (d) => d?.quotes?.USD?.price,
     },
-    unavailable: true,
-  };
-}
-
-/**
- * Fetch recent MEV blocks from Flashbots Blocks API.
- * Returns up to `limit` recent blocks with builder info and MEV reward.
- */
-async function fetchFlashbotsBlocks(signal) {
-  const url = 'https://blocks.flashbots.net/v1/blocks?limit=100';
-  const res = await fetch(url, {
-    signal,
-    headers: { Accept: 'application/json', 'User-Agent': 'Chainscope-HQ/1.0' },
-  });
-  if (!res.ok) throw new Error(`Flashbots HTTP ${res.status}`);
-  const data = await res.json();
-  // Flashbots returns { blocks: [...] }
-  return data.blocks || data;
-}
-
-/**
- * Fetch recent MEV activity from libMEV API as secondary source.
- */
-async function fetchLibMev(signal) {
-  try {
-    const res = await fetch('https://api.libmev.com/v1/bundles?limit=20', {
-      signal,
-      headers: { Accept: 'application/json', 'User-Agent': 'Chainscope-HQ/1.0' },
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
+  ];
+  for (const lane of lanes) {
+    try {
+      const res = await fetch(lane.url, {
+        signal,
+        headers: { Accept: 'application/json', 'User-Agent': UA_BOT },
+      });
+      if (!res.ok) continue;
+      const price = lane.read(await res.json());
+      if (Number.isFinite(price) && price > 0) return price;
+    } catch {
+      // Try the next lane.
+    }
   }
+  return null;
 }
 
-/**
- * Compute aggregated stats from raw block data.
- */
-function computeStats(blocks) {
-  if (!blocks || blocks.length === 0) return buildFallbackResult();
+/** Delivered payloads from the first relay that answers. */
+async function fetchDeliveredPayloads(signal) {
+  const failures = [];
+  for (const relay of RELAYS) {
+    try {
+      const res = await fetch(`${relay.url}${PAYLOAD_PATH}`, {
+        signal,
+        headers: { Accept: 'application/json', 'User-Agent': UA_BOT },
+      });
+      if (!res.ok) {
+        failures.push(`${relay.name}: HTTP ${res.status}`);
+        continue;
+      }
+      const payloads = await res.json();
+      if (Array.isArray(payloads) && payloads.length) {
+        return { relay: relay.name, payloads, failures };
+      }
+      failures.push(`${relay.name}: empty payload list`);
+    } catch (err) {
+      failures.push(`${relay.name}: ${err.message}`);
+    }
+  }
+  throw new Error(`No MEV-Boost relay answered. ${failures.join(' | ')}`);
+}
 
-  const ethPrice = 3500; // approximate; in production could fetch from coingecko
+function buildSnapshot({ relay, payloads, failures }, ethPrice) {
+  // Newest first, which is how the relay already orders them.
+  const sorted = [...payloads].sort((a, b) => Number(b.slot) - Number(a.slot));
 
-  // Map raw blocks → normalised
-  const recentBlocks = blocks.slice(0, 20).map((b) => {
-    const mevReward = parseFloat(b.mev_reward || b.proposer_fee_recipient_reward || '0') / 1e18;
+  const blocks = sorted.slice(0, 20).map((p) => {
+    const valueEth = Number(BigInt(p.value)) / 1e18;
     return {
-      blockNumber: b.block_number || b.blockNumber || 0,
-      mevReward: +mevReward.toFixed(6),
-      mevRewardUSD: +(mevReward * ethPrice).toFixed(2),
-      gasUsed: b.gas_used || b.gasUsed || 0,
-      txCount: b.transactions?.length ?? b.tx_count ?? 0,
-      builderName: b.builder_pubkey_label || b.extra_data || b.builderName || 'unknown',
-      timestamp: b.timestamp
-        ? new Date(typeof b.timestamp === 'number' ? b.timestamp * 1000 : b.timestamp).toISOString()
-        : new Date().toISOString(),
-      sandwichCount: b.sandwich_count ?? 0,
-      arbitrageCount: b.arbitrage_count ?? 0,
-      liquidationCount: b.liquidation_count ?? 0,
+      blockNumber: Number(p.block_number),
+      slot: Number(p.slot),
+      proposerPaymentEth: round(valueEth, 6),
+      proposerPaymentUSD: ethPrice ? round(valueEth * ethPrice, 2) : null,
+      gasUsed: Number(p.gas_used),
+      gasLimit: Number(p.gas_limit),
+      txCount: Number(p.num_tx),
+      builderName: builderLabel(p.builder_pubkey),
+      builderPubkey: p.builder_pubkey,
+      timestamp: slotToIso(p.slot),
     };
   });
 
-  // Builder share
-  const builderMap = {};
-  for (const b of blocks) {
-    const name = b.builder_pubkey_label || b.extra_data || 'unknown';
-    if (!builderMap[name]) builderMap[name] = 0;
-    builderMap[name]++;
+  const builderCounts = new Map();
+  for (const p of sorted) {
+    const name = builderLabel(p.builder_pubkey);
+    builderCounts.set(name, (builderCounts.get(name) || 0) + 1);
   }
-  const totalBlockCount = blocks.length;
-  const builderShare = Object.entries(builderMap)
-    .map(([name, count]) => ({
+  const builderShare = [...builderCounts.entries()]
+    .map(([name, blockCount]) => ({
       name,
-      share: +((count / totalBlockCount) * 100).toFixed(1),
-      blockCount: count,
+      blockCount,
+      share: round((blockCount / sorted.length) * 100, 1),
     }))
     .sort((a, b) => b.blockCount - a.blockCount)
     .slice(0, 10);
 
-  // Aggregate stats
-  const totalMevETH = blocks.reduce((sum, b) => {
-    return sum + parseFloat(b.mev_reward || b.proposer_fee_recipient_reward || '0') / 1e18;
-  }, 0);
-  const avgMevPerBlock = totalMevETH / (totalBlockCount || 1);
-  const topBuilder = builderShare[0]?.name || 'unknown';
-  const builderDominance = builderShare[0]?.share || 0;
+  const totalEth = sorted.reduce((sum, p) => sum + Number(BigInt(p.value)) / 1e18, 0);
+  const avgEth = totalEth / sorted.length;
 
-  // Sandwich estimation (if not provided by the API, estimate ~15% of blocks)
-  const sandwichBlocks = blocks.filter((b) => (b.sandwich_count ?? 0) > 0).length;
-  const sandwichRate = totalBlockCount > 0 ? sandwichBlocks / totalBlockCount : 0.15;
-
-  // Top sandwiches (from blocks that have sandwich data)
-  const topSandwiches = blocks
-    .filter((b) => b.sandwich_count > 0 || b.top_sandwich)
-    .slice(0, 5)
-    .map((b) => ({
-      hash: b.top_sandwich?.hash || `0x${(b.block_number || 0).toString(16)}`,
-      victimSwap: b.top_sandwich?.victim || { token: 'Unknown', amount: 0, dex: 'Uniswap V3' },
-      profit: b.top_sandwich?.profit || 0,
-      profitUSD: (b.top_sandwich?.profit || 0) * ethPrice,
-      blockNumber: b.block_number || b.blockNumber || 0,
-      timestamp: b.timestamp
-        ? new Date(typeof b.timestamp === 'number' ? b.timestamp * 1000 : b.timestamp).toISOString()
-        : new Date().toISOString(),
-    }));
+  // The sampled window, measured from the slots actually returned.
+  const newestSlot = Number(sorted[0].slot);
+  const oldestSlot = Number(sorted[sorted.length - 1].slot);
+  const windowSeconds = (newestSlot - oldestSlot) * SECONDS_PER_SLOT;
 
   return {
     timestamp: new Date().toISOString(),
-    recentBlocks,
-    stats: {
-      totalMev24h: +(totalMevETH * ethPrice).toFixed(2),
-      avgMevPerBlock: +avgMevPerBlock.toFixed(6),
-      topBuilder,
-      builderDominance,
-      sandwichVolume24h: +(totalMevETH * ethPrice * sandwichRate).toFixed(2),
-      arbitrageProfit24h: +(totalMevETH * ethPrice * 0.4).toFixed(2), // ~40% of MEV is arb
+    source: {
+      relay,
+      note: 'Payloads delivered by this relay only. Every relay wins a fraction of blocks, so these are not network-wide MEV totals.',
+      relayFailures: failures,
+      ethPriceUSD: ethPrice ? round(ethPrice, 2) : null,
+      ethPriceUnavailable: ethPrice === null,
     },
-    topSandwiches,
+    window: {
+      payloadCount: sorted.length,
+      newestSlot,
+      oldestSlot,
+      seconds: windowSeconds,
+      newestBlockAt: slotToIso(newestSlot),
+    },
+    blocks,
     builderShare,
-    summary: {
-      totalBlocks: totalBlockCount,
-      avgMevUSD: +(avgMevPerBlock * ethPrice).toFixed(2),
-      sandwichRate: +sandwichRate.toFixed(3),
-      topMevType: sandwichRate > 0.2 ? 'sandwich' : 'arbitrage',
+    stats: {
+      totalProposerPaymentEth: round(totalEth, 6),
+      totalProposerPaymentUSD: ethPrice ? round(totalEth * ethPrice, 2) : null,
+      avgProposerPaymentEth: round(avgEth, 6),
+      avgProposerPaymentUSD: ethPrice ? round(avgEth * ethPrice, 2) : null,
+      topBuilder: builderShare[0]?.name || 'unknown',
+      builderDominance: builderShare[0]?.share ?? 0,
     },
   };
 }
@@ -176,14 +183,12 @@ export default async function handler(req) {
     if (isDisallowedOrigin(req)) return new Response(null, { status: 403, headers: cors });
     return new Response(null, { status: 204, headers: cors });
   }
-
   if (isDisallowedOrigin(req)) {
     return new Response(JSON.stringify({ error: 'Forbidden' }), {
       status: 403,
       headers: { ...cors, 'Content-Type': 'application/json' },
     });
   }
-
   if (req.method !== 'GET') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
@@ -199,78 +204,35 @@ export default async function handler(req) {
     });
   }
 
-  // In-memory cache
-  const now = Date.now();
-  if (cachedResponse && now - cacheTimestamp < CACHE_TTL * 1000) {
-    return new Response(JSON.stringify(cachedResponse), {
-      headers: {
-        ...cors,
-        'Content-Type': 'application/json',
-        'X-Cache': 'HIT',
-        'Cache-Control': `public, s-maxage=${CACHE_TTL}, stale-while-revalidate=300`,
-      },
-    });
-  }
-
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12_000);
-
-    const [flashbotsBlocks, libMevData] = await Promise.allSettled([
-      fetchFlashbotsBlocks(controller.signal),
-      fetchLibMev(controller.signal),
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    const [delivered, ethPrice] = await Promise.all([
+      fetchDeliveredPayloads(controller.signal),
+      fetchEthPrice(controller.signal),
     ]);
-
     clearTimeout(timeout);
 
-    const blocks =
-      flashbotsBlocks.status === 'fulfilled' && Array.isArray(flashbotsBlocks.value)
-        ? flashbotsBlocks.value
-        : [];
+    const snapshot = buildSnapshot(delivered, ethPrice);
+    staleResponse = snapshot;
 
-    const result = computeStats(blocks);
-
-    // Enrich with libMEV data if available
-    if (libMevData.status === 'fulfilled' && libMevData.value) {
-      // libMEV can provide more granular sandwich data
-      const bundles = Array.isArray(libMevData.value) ? libMevData.value : libMevData.value.bundles || [];
-      if (bundles.length > 0 && result.topSandwiches.length === 0) {
-        result.topSandwiches = bundles.slice(0, 5).map((b) => ({
-          hash: b.transaction_hash || b.hash || '0x',
-          victimSwap: {
-            token: b.token_symbol || 'Unknown',
-            amount: b.victim_amount || 0,
-            dex: b.protocol || 'Uniswap V3',
-          },
-          profit: b.profit_eth || 0,
-          profitUSD: b.profit_usd || 0,
-          blockNumber: b.block_number || 0,
-          timestamp: b.timestamp || new Date().toISOString(),
-        }));
-      }
-    }
-
-    cachedResponse = result;
-    cacheTimestamp = now;
-
-    return new Response(JSON.stringify(result), {
+    return new Response(JSON.stringify(snapshot), {
       headers: {
-        ...cors,
         'Content-Type': 'application/json',
+        ...cors,
         'X-Cache': 'MISS',
-        'Cache-Control': `public, s-maxage=${CACHE_TTL}, stale-while-revalidate=300`,
+        'Cache-Control': `public, max-age=${CACHE_TTL}, s-maxage=${CACHE_TTL}, stale-while-revalidate=60`,
       },
     });
   } catch (err) {
-    console.error('[mev-monitor]', err?.message || err);
-    const fallback = cachedResponse || buildFallbackResult();
-    return new Response(JSON.stringify(fallback), {
-      status: 200,
-      headers: {
-        ...cors,
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=60',
-      },
-    });
+    if (staleResponse) {
+      return new Response(JSON.stringify(staleResponse), {
+        headers: { 'Content-Type': 'application/json', ...cors, 'X-Cache': 'STALE', 'Cache-Control': 'public, max-age=60' },
+      });
+    }
+    return new Response(
+      JSON.stringify({ error: 'Failed to reach any MEV-Boost relay', detail: err.message }),
+      { status: 502, headers: { 'Content-Type': 'application/json', ...cors } }
+    );
   }
 }

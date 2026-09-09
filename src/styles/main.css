@@ -19255,3 +19255,10 @@ body.has-critical-banner .panels-grid {
 @media (prefers-reduced-motion: reduce) {
   .chov-bar { transition: none; }
 }
+
+/* ── MEV Monitor provenance footer ────────────────────────────────── */
+.mev-source { border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 6px; }
+.mev-source-line { font-size: 10px; color: rgba(255, 255, 255, 0.55); }
+.mev-source-note { font-size: 9px; color: rgba(255, 255, 255, 0.38); line-height: 1.4; margin-top: 3px; }
+.mev-block-num { color: inherit; text-decoration: none; border-bottom: 1px dotted rgba(255, 255, 255, 0.25); }
+.mev-block-num:hover, .mev-block-num:focus-visible { color: var(--accent); border-bottom-color: var(--accent); }

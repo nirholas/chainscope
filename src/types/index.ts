@@ -1632,23 +1632,16 @@ export interface AirdropTrackerResult {
 
 export interface MevBlock {
   blockNumber: number;
-  mevReward: number;
-  mevRewardUSD: number;
+  slot: number;
+  /** Payment the builder made to the proposer for this block, in ETH. */
+  proposerPaymentEth: number;
+  /** Null when no ETH price lane answered; never a placeholder number. */
+  proposerPaymentUSD: number | null;
   gasUsed: number;
+  gasLimit: number;
   txCount: number;
   builderName: string;
-  timestamp: string;
-  sandwichCount: number;
-  arbitrageCount: number;
-  liquidationCount: number;
-}
-
-export interface MevSandwich {
-  hash: string;
-  victimSwap: { token: string; amount: number; dex: string };
-  profit: number;
-  profitUSD: number;
-  blockNumber: number;
+  builderPubkey: string;
   timestamp: string;
 }
 
@@ -1660,24 +1653,30 @@ export interface MevBuilderShare {
 
 export interface MevMonitorResult {
   timestamp: string;
-  recentBlocks: MevBlock[];
+  source: {
+    relay: string;
+    note: string;
+    relayFailures: string[];
+    ethPriceUSD: number | null;
+    ethPriceUnavailable: boolean;
+  };
+  window: {
+    payloadCount: number;
+    newestSlot: number;
+    oldestSlot: number;
+    seconds: number;
+    newestBlockAt: string;
+  };
+  blocks: MevBlock[];
+  builderShare: MevBuilderShare[];
   stats: {
-    totalMev24h: number;
-    avgMevPerBlock: number;
+    totalProposerPaymentEth: number;
+    totalProposerPaymentUSD: number | null;
+    avgProposerPaymentEth: number;
+    avgProposerPaymentUSD: number | null;
     topBuilder: string;
     builderDominance: number;
-    sandwichVolume24h: number;
-    arbitrageProfit24h: number;
   };
-  topSandwiches: MevSandwich[];
-  builderShare: MevBuilderShare[];
-  summary: {
-    totalBlocks: number;
-    avgMevUSD: number;
-    sandwichRate: number;
-    topMevType: string;
-  };
-  unavailable?: boolean;
 }
 
 /* ── TVL Geographic Heatmap Types ── */
