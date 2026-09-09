@@ -108,7 +108,10 @@ function fmtETH(v) {
 // ── Fetch large Etherscan transactions ──
 async function fetchEtherscanLargeTxs(controller) {
   const apiKey = typeof process !== 'undefined' ? (process.env?.ETHERSCAN_API_KEY || '') : '';
-  const keyParam = apiKey ? `&apikey=${apiKey}` : '';
+  // Etherscan V2 requires a key. Without one there is no lane at all, and
+  // reporting that is very different from reporting that no whales moved.
+  if (!apiKey) return null;
+  const keyParam = `&apikey=${apiKey}`;
 
   // Fetch recent blocks (internal transfer list limited; use normal eth txs for a known high-volume block range)
   // We'll use Etherscan's "list normal transactions by address" for top exchange addresses
@@ -131,7 +134,10 @@ async function fetchEtherscanLargeTxs(controller) {
   // Fetch in batches to stay within rate limits
   for (const addr of probeAddresses) {
     try {
-      const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${addr}&startblock=0&endblock=99999999&page=1&offset=25&sort=desc${keyParam}`;
+      // V2. The V1 host answers every request with "You are using a deprecated
+      // V1 endpoint", which this route used to swallow, so the panel showed an
+      // empty list that read as "no whale activity" rather than "no data".
+      const url = `https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlist&address=${addr}&startblock=0&endblock=99999999&page=1&offset=25&sort=desc${keyParam}`;
       const res = await fetch(url, { signal: controller.signal, headers: { Accept: 'application/json' } });
       if (!res.ok) continue;
       const data = await res.json();
@@ -290,6 +296,22 @@ export default async function handler(req) {
       fetchEthPrice(controller),
     ]);
     clearTimeout(timeout);
+
+    // null means the lane has no credential, which the panel must show as
+    // "not configured" rather than as an empty set of whale movements.
+    if (rawTxs === null) {
+      return new Response(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          configured: false,
+          reason: 'ETHERSCAN_API_KEY not configured',
+          transactions: [],
+          summary: { totalVolume1h: 0, exchangeInflows: 0, exchangeOutflows: 0, netExchangeFlow: 0, largestTx: { hash: '', valueUSD: 0 }, alertCount: 0, txCount: 0 },
+          alerts: [],
+        }),
+        { headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'public, s-maxage=300' } }
+      );
+    }
 
     const result = buildResult(rawTxs, ethPrice);
 
