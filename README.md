@@ -114,3 +114,7 @@ Those portions were obtained while worldmonitor was MIT-licensed (its MIT LICENS
 ## License
 
 Proprietary. Copyright (c) 2025-2026 nich. All rights reserved: see [LICENSE](LICENSE). No permission is granted to use, copy, modify, or distribute this software without prior written consent.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=nirholas/chainscope&type=Date)](https://www.star-history.com/#nirholas/chainscope&Date)
