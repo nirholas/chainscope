@@ -1,0 +1,28 @@
+# chainscope
+
+> Open dashboard for onchain trading: perps, trenches, arbitrage and a live overview of every chain
+
+chainscope is an open-source repository by nirholas, part of the three.ws ecosystem.
+
+## Docs
+
+- [README](https://github.com/nirholas/chainscope/blob/HEAD/README.md): install, usage and reference
+- [What it covers](https://github.com/nirholas/chainscope/blob/HEAD/README.md#what-it-covers)
+- [Quick start](https://github.com/nirholas/chainscope/blob/HEAD/README.md#quick-start)
+- [Commands](https://github.com/nirholas/chainscope/blob/HEAD/README.md#commands)
+- [Architecture](https://github.com/nirholas/chainscope/blob/HEAD/README.md#architecture)
+- [Configuration](https://github.com/nirholas/chainscope/blob/HEAD/README.md#configuration)
+- [Desktop](https://github.com/nirholas/chainscope/blob/HEAD/README.md#desktop)
+- [Deployment](https://github.com/nirholas/chainscope/blob/HEAD/README.md#deployment)
+- [Acknowledgements](https://github.com/nirholas/chainscope/blob/HEAD/README.md#acknowledgements)
+- [AGENTS.md](https://github.com/nirholas/chainscope/blob/HEAD/AGENTS.md): guidance for coding agents
+- [Full text for LLMs](https://github.com/nirholas/chainscope/blob/HEAD/llms-full.txt): the README inlined
+
+## Project
+
+- [Source](https://github.com/nirholas/chainscope)
+- [Issues](https://github.com/nirholas/chainscope/issues)
+- [Discussions](https://github.com/nirholas/chainscope/discussions)
+- [Homepage](https://three.ws)
+- [three.ws](https://three.ws): the platform this is part of
+- [All repositories by nirholas](https://github.com/nirholas/nirholas#readme)

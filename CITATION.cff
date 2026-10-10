@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: "chainscope"
+abstract: "Open dashboard for onchain trading: perps, trenches, arbitrage and a live overview of every chain"
+repository-code: "https://github.com/nirholas/chainscope"
+url: "https://three.ws"
+authors:
+  - name: three.ws
+    website: "https://three.ws"
