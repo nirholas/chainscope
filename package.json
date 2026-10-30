@@ -56,7 +56,7 @@
     "@types/topojson-specification": "^1.0.5",
     "markdownlint-cli2": "^0.20.0",
     "typescript": "^5.7.2",
-    "vite": "^6.0.7",
+    "vite": "^6.4.5",
     "vite-plugin-pwa": "^1.2.0",
     "wrangler": "^4.129.0",
     "ws": "^8.19.0"
