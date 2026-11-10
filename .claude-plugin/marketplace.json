@@ -1,0 +1,22 @@
+{
+  "name": "chainscope",
+  "owner": {
+    "name": "nirholas"
+  },
+  "description": "Live onchain market data (perps, DEX, chains, gas, TVL) from the Chainscope dashboard JSON API.",
+  "plugins": [
+    {
+      "name": "chainscope",
+      "source": "./plugins/chainscope",
+      "description": "Live onchain market data (perps, DEX, chains, gas, TVL) from the Chainscope dashboard JSON API.",
+      "category": "finance",
+      "tags": [
+        "onchain",
+        "perps",
+        "defi",
+        "market-data",
+        "dashboard"
+      ]
+    }
+  ]
+}
